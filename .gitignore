@@ -1,0 +1,13 @@
+# EiffelStudio generated files
+EIFGENs/
+
+# IDE files
+*.swp
+*~
+.idea/
+.vscode/
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
