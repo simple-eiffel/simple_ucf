@@ -23,6 +23,7 @@
 		<library name="simple_toml" location="$SIMPLE_TOML\simple_toml.ecf"/>
 		<library name="simple_xml" location="$SIMPLE_XML\simple_xml.ecf"/>
 		<library name="simple_file" location="$SIMPLE_FILE\simple_file.ecf"/>
+		<library name="simple_env" location="$SIMPLE_ENV\simple_env.ecf"/>
 		<cluster name="src" location=".\src\" recursive="true"/>
 	</target>
 	<target name="simple_ucf_tests" extends="simple_ucf">

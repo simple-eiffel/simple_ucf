@@ -403,31 +403,24 @@ feature {NONE} -- Path Resolution
 feature {NONE} -- Environment Discovery
 
 	get_simple_env_vars: ARRAYED_LIST [STRING_32]
-			-- Get all SIMPLE_* environment variable names
+			-- Get all SIMPLE_* environment variable names dynamically.
+			-- Uses SIMPLE_ENV.names_with_prefix for true discovery.
 		local
+			l_env: SIMPLE_ENV
 			l_exec: EXECUTION_ENVIRONMENT
-			l_known: ARRAY [STRING]
 		do
+			create l_env
 			create l_exec
-			create Result.make (50)
 
-			-- Check known SIMPLE_* variables
-			l_known := <<"SIMPLE_JSON", "SIMPLE_SQL", "SIMPLE_XML", "SIMPLE_TOML", "SIMPLE_YAML",
-				"SIMPLE_CODEC", "SIMPLE_FILE", "SIMPLE_PROCESS", "SIMPLE_CONSOLE",
-				"SIMPLE_CLI", "SIMPLE_CONFIG", "SIMPLE_HTTP", "SIMPLE_ENCRYPTION",
-				"SIMPLE_COMPRESSION", "SIMPLE_ARCHIVE", "SIMPLE_I18N", "SIMPLE_REGEX",
-				"SIMPLE_DATETIME", "SIMPLE_UUID", "SIMPLE_BASE64", "SIMPLE_CSV",
-				"SIMPLE_MARKDOWN", "SIMPLE_SMTP", "SIMPLE_HASH", "SIMPLE_LOGGER",
-				"SIMPLE_TESTING", "SIMPLE_WIN32_API", "SIMPLE_REGISTRY", "SIMPLE_CLIPBOARD",
-				"SIMPLE_WATCHER", "SIMPLE_ENV", "SIMPLE_RANDOMIZER", "SIMPLE_WEB",
-				"SIMPLE_HTMX", "SIMPLE_ALPINE", "SIMPLE_WEBSOCKET", "SIMPLE_VALIDATION",
-				"SIMPLE_SHOWCASE", "SIMPLE_AI_CLIENT", "SIMPLE_GUI_DESIGNER", "SIMPLE_CI",
-				"SIMPLE_SETUP", "SIMPLE_LSP", "SIMPLE_ORACLE", "SIMPLE_EIFFEL_PARSER",
-				"SIMPLE_UCF", "SIMPLE_MONGO">>
+			-- Dynamic discovery: enumerate all SIMPLE_* env vars
+			Result := l_env.names_with_prefix ("SIMPLE_")
 
-			across l_known as ic loop
-				if attached l_exec.get (ic) as l_val and then not l_val.is_empty then
-					Result.extend (ic.to_string_32)
+			-- Filter to only those that have actual paths set
+			from Result.start until Result.after loop
+				if attached l_exec.get (Result.item.to_string_8) as l_val and then not l_val.is_empty then
+					Result.forth
+				else
+					Result.remove
 				end
 			end
 		ensure
