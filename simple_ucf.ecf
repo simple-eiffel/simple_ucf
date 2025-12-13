@@ -33,6 +33,7 @@
 		</file_rule>
 		<setting name="console_application" value="true"/>
 		<library name="testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
+		<library name="simple_testing" location="$SIMPLE_TESTING\simple_testing.ecf"/>
 		<cluster name="test_cases" location=".\testing\"/>
 	</target>
 </system>

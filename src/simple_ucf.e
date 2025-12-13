@@ -100,7 +100,7 @@ feature -- Loading
 			reset
 			create l_file.make (a_path)
 			if l_file.exists then
-				if attached l_file.read_text as l_content and then not l_content.is_empty then
+				if attached l_file.load as l_content and then not l_content.is_empty then
 					parse_ucf (l_content)
 				else
 					last_errors.extend ("Failed to read file: " + a_path)
