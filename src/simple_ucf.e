@@ -446,7 +446,7 @@ feature {NONE} -- Helpers
 	current_timestamp: STRING_32
 			-- Current timestamp as string
 		local
-			l_date: DATE_TIME
+			l_date: SIMPLE_DATE_TIME
 		do
 			create l_date.make_now
 			Result := l_date.out
