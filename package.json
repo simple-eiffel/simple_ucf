@@ -1,0 +1,9 @@
+{
+  "name": "simple_ucf",
+  "version": "0.1.0",
+  "description": "Universe Configuration File - Ecosystem-wide project configuration using TOML",
+  "author": "Larry Rix",
+  "license": "MIT",
+  "category": "parser",
+  "keywords": ["ucf", "unicode", "character", "text"]
+}
