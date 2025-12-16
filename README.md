@@ -16,6 +16,18 @@ Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
 
 **Developed using AI-assisted methodology:** Built interactively with Claude Opus 4.5 following rigorous Design by Contract principles.
 
+## Installation
+
+Set the ecosystem environment variable (one-time setup for all simple_* libraries):
+```
+SIMPLE_EIFFEL=D:\prod
+```
+
+Add to your ECF:
+```xml
+<library name="simple_ucf" location="$SIMPLE_EIFFEL/simple_ucf/simple_ucf.ecf"/>
+```
+
 ## Overview
 
 UCF defines an **ecosystem** - a collection of related Eiffel projects/libraries that should be analyzed together. While ECF (Eiffel Configuration File) defines a single project, UCF spans the entire ecosystem.
