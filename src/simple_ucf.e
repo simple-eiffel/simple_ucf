@@ -122,33 +122,75 @@ feature -- Loading
 		end
 
 	discover_from_environment
-			-- Auto-discover libraries from SIMPLE_* environment variables
+			-- Auto-discover libraries.
+			-- First tries SIMPLE_EIFFEL root, then falls back to legacy SIMPLE_* variables.
+		local
+			l_exec: EXECUTION_ENVIRONMENT
+		do
+			reset
+			create l_exec
+
+			-- First try SIMPLE_EIFFEL root discovery (new method)
+			if attached l_exec.get ("SIMPLE_EIFFEL") as l_root then
+				discover_from_simple_eiffel_root_impl (l_root.to_string_32)
+			end
+
+			-- If nothing found, fall back to legacy discovery
+			if libraries.is_empty then
+				discover_from_legacy_env_vars
+			end
+
+			is_valid := not libraries.is_empty
+			if not is_valid then
+				last_errors.extend ("No libraries found. Set SIMPLE_EIFFEL to your ecosystem root directory.")
+			end
+		end
+
+	discover_from_simple_eiffel_root
+			-- Auto-discover libraries from SIMPLE_EIFFEL root directory.
+			-- This is the primary discovery method - scans subdirectories for simple_* folders.
+		local
+			l_exec: EXECUTION_ENVIRONMENT
+		do
+			reset
+			create l_exec
+
+			if attached l_exec.get ("SIMPLE_EIFFEL") as l_root then
+				discover_from_simple_eiffel_root_impl (l_root.to_string_32)
+				is_valid := not libraries.is_empty
+			else
+				last_errors.extend ("SIMPLE_EIFFEL environment variable not set")
+				is_valid := False
+			end
+		end
+
+	discover_from_legacy_env_vars
+			-- Auto-discover libraries from legacy SIMPLE_* environment variables.
+			-- Kept for backward compatibility.
 		local
 			l_exec: EXECUTION_ENVIRONMENT
 			l_vars: ARRAYED_LIST [STRING_32]
 			l_lib: UCF_LIBRARY
 		do
-			reset
+			-- Don't reset - this may be called as fallback
 			create l_exec
 			l_vars := get_simple_env_vars
 
 			universe_name := "simple-eiffel"
-			universe_description := "Auto-discovered Simple Eiffel ecosystem"
+			universe_description := "Auto-discovered Simple Eiffel ecosystem (legacy)"
 
 			across l_vars as ic loop
-				if attached l_exec.get (ic) as l_path then
-					create l_lib.make
-					l_lib.name := ic.as_lower
-					l_lib.location := "$" + ic
-					l_lib.resolved_path := l_path
-					l_lib.ecf := l_lib.name + ".ecf"
-					libraries.extend (l_lib)
+				-- Skip SIMPLE_EIFFEL itself - it's the root, not a library
+				if not ic.same_string_general ("SIMPLE_EIFFEL") then
+					if attached l_exec.get (ic) as l_path then
+						create l_lib.make
+						l_lib.name := ic.as_lower
+						l_lib.location := "$" + ic
+						l_lib.resolved_path := l_path
+						l_lib.ecf := l_lib.name + ".ecf"
+						libraries.extend (l_lib)
+					end
 				end
-			end
-
-			is_valid := not libraries.is_empty
-			if not is_valid then
-				last_errors.extend ("No SIMPLE_* environment variables found")
 			end
 		end
 
@@ -401,6 +443,51 @@ feature {NONE} -- Path Resolution
 		end
 
 feature {NONE} -- Environment Discovery
+
+	discover_from_simple_eiffel_root_impl (a_root: STRING_32)
+			-- Discover libraries from SIMPLE_EIFFEL root directory.
+			-- Scans for simple_* subdirectories containing .ecf files.
+		require
+			root_not_empty: not a_root.is_empty
+		local
+			l_dir: DIRECTORY
+			l_entry_path: STRING_32
+			l_ecf_path: STRING_32
+			l_ecf_file: RAW_FILE
+			l_lib: UCF_LIBRARY
+		do
+			universe_name := "simple-eiffel"
+			universe_description := "Auto-discovered from $SIMPLE_EIFFEL"
+			universe_root := a_root
+
+			create l_dir.make_with_name (a_root)
+			if l_dir.exists then
+				l_dir.open_read
+				across l_dir.entries as entry loop
+					if attached entry.name as l_name then
+						-- Look for simple_* directories
+						if l_name.starts_with ("simple_") and then not l_name.same_string (".") and then not l_name.same_string ("..") then
+							l_entry_path := a_root + "/" + l_name
+							-- Check if it's a directory with an ECF file
+							create l_dir.make_with_name (l_entry_path)
+							if l_dir.exists then
+								l_ecf_path := l_entry_path + "/" + l_name + ".ecf"
+								create l_ecf_file.make_with_name (l_ecf_path)
+								if l_ecf_file.exists then
+									create l_lib.make
+									l_lib.name := l_name
+									l_lib.location := "$SIMPLE_EIFFEL/" + l_name
+									l_lib.resolved_path := l_entry_path
+									l_lib.ecf := l_name + ".ecf"
+									libraries.extend (l_lib)
+								end
+							end
+						end
+					end
+				end
+				l_dir.close
+			end
+		end
 
 	get_simple_env_vars: ARRAYED_LIST [STRING_32]
 			-- Get all SIMPLE_* environment variable names dynamically.
