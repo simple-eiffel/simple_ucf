@@ -131,7 +131,7 @@ feature -- Loading
 			create l_exec
 
 			-- First try SIMPLE_EIFFEL root discovery (new method)
-			if attached l_exec.get ("SIMPLE_EIFFEL") as l_root then
+			if attached l_exec.item ("SIMPLE_EIFFEL") as l_root then
 				discover_from_simple_eiffel_root_impl (l_root.to_string_32)
 			end
 
@@ -155,7 +155,7 @@ feature -- Loading
 			reset
 			create l_exec
 
-			if attached l_exec.get ("SIMPLE_EIFFEL") as l_root then
+			if attached l_exec.item ("SIMPLE_EIFFEL") as l_root then
 				discover_from_simple_eiffel_root_impl (l_root.to_string_32)
 				is_valid := not libraries.is_empty
 			else
@@ -182,7 +182,7 @@ feature -- Loading
 			across l_vars as ic loop
 				-- Skip SIMPLE_EIFFEL itself - it's the root, not a library
 				if not ic.same_string_general ("SIMPLE_EIFFEL") then
-					if attached l_exec.get (ic) as l_path then
+					if attached l_exec.item (ic) as l_path then
 						create l_lib.make
 						l_lib.name := ic.as_lower
 						l_lib.location := "$" + ic
@@ -427,7 +427,7 @@ feature {NONE} -- Path Resolution
 				end
 
 				l_var_name := l_result.substring (l_start + 1, l_end - 1)
-				if attached l_exec.get (l_var_name) as l_val then
+				if attached l_exec.item (l_var_name) as l_val then
 					l_result.replace_substring (l_val, l_start, l_end - 1)
 				end
 
@@ -504,7 +504,7 @@ feature {NONE} -- Environment Discovery
 
 			-- Filter to only those that have actual paths set
 			from Result.start until Result.after loop
-				if attached l_exec.get (Result.item.to_string_8) as l_val and then not l_val.is_empty then
+				if attached l_exec.item (Result.item.to_string_8) as l_val and then not l_val.is_empty then
 					Result.forth
 				else
 					Result.remove
