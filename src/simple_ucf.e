@@ -451,6 +451,7 @@ feature {NONE} -- Environment Discovery
 			root_not_empty: not a_root.is_empty
 		local
 			l_dir: DIRECTORY
+			l_sub: DIRECTORY
 			l_entry_path: STRING_32
 			l_ecf_path: STRING_32
 			l_ecf_file: RAW_FILE
@@ -469,8 +470,10 @@ feature {NONE} -- Environment Discovery
 						if l_name.starts_with ("simple_") and then not l_name.same_string (".") and then not l_name.same_string ("..") then
 							l_entry_path := a_root + "/" + l_name
 							-- Check if it's a directory with an ECF file
-							create l_dir.make_with_name (l_entry_path)
-							if l_dir.exists then
+							-- (separate local: re-creating l_dir would orphan
+							-- the opened outer directory and break the close)
+							create l_sub.make_with_name (l_entry_path)
+							if l_sub.exists then
 								l_ecf_path := l_entry_path + "/" + l_name + ".ecf"
 								create l_ecf_file.make_with_name (l_ecf_path)
 								if l_ecf_file.exists then
